@@ -103,3 +103,17 @@ Now you can add Monit alert by adding this line to Monit configuration file.
 check file nginx.pid with path /var/run/nginx.pid
     if changed pid then exec "/usr/local/bin/monit2telegram"
 ```
+
+https://superuser.com/a/1409917
+
+Если вам нужно только знать, работает ли служба, вы можете запросить systemd:
+
+systemctl is-active TestApp.service
+Вы также можете проверить, неактивен ли он именно из-за известного сбоя:
+
+systemctl is-failed TestApp.service
+Согласно документам, это может быть включено в monit как check program … with path:
+
+check program TestApp with path "systemctl --quiet is-active TestApp"
+    if status != 0 then ...
+Обратите внимание, что systemd PIDFile=предназначен для указания init, откуда читать PID. Если сам демон не создает pid-файл, systemd определенно не будет беспокоиться. Если вам это действительно нужно, вы можете иметь ExecStartPost=/bin/sh -c "echo $MAINPID > /run/testapp.pid"или что-то подобное.
